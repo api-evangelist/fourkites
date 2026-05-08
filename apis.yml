@@ -1,0 +1,29 @@
+aid: fourkites
+url: https://raw.githubusercontent.com/api-evangelist/fourkites/refs/heads/main/apis.yml
+name: FourKites
+x-type: company
+description: >-
+  FourKites is a real-time supply chain visibility platform connecting shippers, carriers, and 3PLs with predictive ETAs, yard management, and tracking APIs.
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - Logistics
+  - Supply Chain
+  - Visibility
+  - Tracking
+  - Real-Time
+created: '2026-05-08'
+modified: '2026-05-08'
+specificationVersion: '0.19'
+apis: []
+common:
+  - type: Website
+    url: https://www.fourkites.com/
+  - type: Plans
+    url: plans/fourkites-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/fourkites-rate-limits.yml
+  - type: FinOps
+    url: finops/fourkites-finops.yml
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
