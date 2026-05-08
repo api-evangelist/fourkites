@@ -3,21 +3,37 @@ url: https://raw.githubusercontent.com/api-evangelist/fourkites/refs/heads/main/
 name: FourKites
 x-type: company
 description: >-
-  FourKites is a real-time supply chain visibility platform connecting shippers, carriers, and 3PLs with predictive ETAs, yard management, and tracking APIs.
+  FourKites is a real-time supply chain visibility platform that tracks shipments and assets across road, rail, ocean, and yard modes worldwide.
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 tags:
   - Logistics
-  - Supply Chain
-  - Visibility
+  - Supply Chain Visibility
   - Tracking
-  - Real-Time
+  - Freight
+  - ETA
 created: '2026-05-08'
 modified: '2026-05-08'
 specificationVersion: '0.19'
-apis: []
+apis:
+  - aid: fourkites:fourkites-tracking-api
+    name: FourKites Tracking API
+    description: >-
+      FourKites Tracking API provides shipment creation, status, and ETA updates plus carrier integrations across modes (TL, LTL, ocean, rail, parcel) for real-time supply chain visibility.
+    image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://developers.fourkites.com/
+    baseURL: https://tracking-api.fourkites.com
+    tags:
+      - Logistics
+      - Tracking
+      - REST
+    properties:
+      - type: Documentation
+        url: https://developers.fourkites.com/
 common:
   - type: Website
     url: https://www.fourkites.com/
+  - type: Documentation
+    url: https://developers.fourkites.com/
   - type: Plans
     url: plans/fourkites-plans-pricing.yml
   - type: RateLimits
