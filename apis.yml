@@ -40,6 +40,33 @@ common:
     url: rate-limits/fourkites-rate-limits.yml
   - type: FinOps
     url: finops/fourkites-finops.yml
+  - type: Integrations
+    url: https://www.fourkites.com/partners/
+integrations:
+  - name: 3GTMS
+  - name: Alpega
+  - name: ArchLynk LLC
+  - name: Ascension Logistics
+  - name: AutoScheduler.AI
+  - name: Blue Yonder
+  - name: Everstream Analytics
+  - name: Infor Nexus
+  - name: Infosys Limited
+  - name: John Galt Solutions
+  - name: Kinaxis
+  - name: Manhattan Associates
+  - name: o9 Solutions
+  - name: Open Sky Group
+  - name: Pando
+  - name: PrimeS4 Technologies LLC
+  - name: Propero Consulting LLC
+  - name: Revenova
+  - name: SAP
+  - name: ShippersEdge
+  - name: SMC3
+  - name: SPS Commerce
+  - name: Tech Mahindra
+  - name: Tive, Inc.
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
