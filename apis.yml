@@ -1,7 +1,7 @@
 aid: fourkites
 url: https://raw.githubusercontent.com/api-evangelist/fourkites/refs/heads/main/apis.yml
 name: FourKites
-x-type: company
+kind: company
 description: >-
   FourKites is a real-time supply chain visibility platform that tracks shipments and assets across road, rail, ocean, and yard modes worldwide.
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
