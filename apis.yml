@@ -30,6 +30,10 @@ apis:
       - type: Documentation
         url: https://developers.fourkites.com/
 common:
+  - type: GitHubOrganization
+    url: https://github.com/FourKites
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/fourkites-inc
   - type: Website
     url: https://www.fourkites.com/
   - type: Documentation
