@@ -1,0 +1,1367 @@
+"""
+FourKites GraphQL Schema
+Conceptual schema derived from the FourKites REST API and platform documentation.
+FourKites provides real-time supply chain visibility across TL, LTL, ocean, rail, and parcel modes.
+https://developers.fourkites.com/
+"""
+
+# ─── Scalars ───────────────────────────────────────────────────────────────────
+
+scalar DateTime
+scalar Date
+scalar JSON
+scalar Float
+scalar GeoJSON
+
+# ─── Enums ─────────────────────────────────────────────────────────────────────
+
+enum ShipmentStatusEnum {
+  CREATED
+  PENDING_TRACKING
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELAYED
+  AT_STOP
+  ARRIVED
+  DEPARTED
+  CANCELLED
+  UNKNOWN
+}
+
+enum TransportMode {
+  TRUCKLOAD
+  LTL
+  OCEAN
+  RAIL
+  PARCEL
+  INTERMODAL
+  AIR
+  YARD
+}
+
+enum StopTypeEnum {
+  PICKUP
+  DELIVERY
+  DROP_HOOK
+  FUEL
+  INSPECTION
+  CUSTOMS
+  TRANSLOAD
+  OTHER
+}
+
+enum StopStatusEnum {
+  SCHEDULED
+  EN_ROUTE
+  ARRIVED
+  DEPARTED
+  COMPLETED
+  SKIPPED
+}
+
+enum MilestoneTypeEnum {
+  PICKUP
+  DELIVERY
+  CUSTOMS_CLEARED
+  RAIL_INTERCHANGE
+  PORT_DEPARTURE
+  PORT_ARRIVAL
+  GATE_IN
+  GATE_OUT
+  VESSEL_DEPARTED
+  VESSEL_ARRIVED
+  OUT_FOR_DELIVERY
+  APPOINTMENT_SET
+  POD_RECEIVED
+}
+
+enum AlertTypeEnum {
+  DELAY
+  GEOFENCE_BREACH
+  TEMPERATURE_BREACH
+  DWELL_TIME_EXCEEDED
+  ROUTE_DEVIATION
+  CARRIER_ISSUE
+  WEATHER_IMPACT
+  CAPACITY_ISSUE
+  CUSTOMS_HOLD
+  MISSED_PICKUP
+  MISSED_DELIVERY
+  ETA_CHANGE
+  UNKNOWN
+}
+
+enum AlertPriorityEnum {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ExceptionTypeEnum {
+  LATE_PICKUP
+  LATE_DELIVERY
+  MISSED_STOP
+  DAMAGED_CARGO
+  REFUSED_DELIVERY
+  SHORT_SHIPMENT
+  CARRIER_NO_SHOW
+  DOCUMENTATION_ERROR
+  CUSTOMS_HOLD
+  WEATHER_DELAY
+  MECHANICAL_BREAKDOWN
+  DRIVER_HOURS_OF_SERVICE
+  OTHER
+}
+
+enum VehicleTypeEnum {
+  DRY_VAN
+  REFRIGERATED
+  FLATBED
+  TANKER
+  CONTAINER
+  LOWBOY
+  STEP_DECK
+  BOX_TRUCK
+  RAIL_CAR
+  VESSEL
+  OTHER
+}
+
+enum EquipmentTypeEnum {
+  TRACTOR
+  TRAILER
+  CONTAINER
+  CHASSIS
+  RAIL_CAR
+  VESSEL
+  OTHER
+}
+
+enum ConfidenceLevelEnum {
+  VERY_HIGH
+  HIGH
+  MEDIUM
+  LOW
+  VERY_LOW
+}
+
+enum WebhookEventTypeEnum {
+  SHIPMENT_CREATED
+  SHIPMENT_STATUS_UPDATED
+  SHIPMENT_LOCATION_UPDATED
+  ETA_UPDATED
+  ALERT_CREATED
+  ALERT_ACKNOWLEDGED
+  EXCEPTION_CREATED
+  EXCEPTION_RESOLVED
+  MILESTONE_REACHED
+  CARRIER_UPDATED
+}
+
+# ─── Core Shipment Types ────────────────────────────────────────────────────────
+
+"""
+Top-level entity representing a freight movement from origin to destination.
+"""
+type Shipment {
+  id: ID!
+  referenceNumber: String
+  customerReferenceNumber: String
+  proNumber: String
+  bolNumber: String
+  poNumber: String
+  mode: TransportMode!
+  status: ShipmentStatus!
+  details: ShipmentDetails
+  origin: Origin!
+  destination: Destination!
+  stops: [Stop!]
+  waypoints: [Waypoint!]
+  carrier: Carrier
+  driver: Driver
+  vehicle: Vehicle
+  load: Load
+  customer: Customer
+  eta: ShipmentETA
+  etaHistory: ETAHistory
+  location: ShipmentLocation
+  milestones: [Milestone!]
+  alerts: [Alert!]
+  exceptions: [Exception!]
+  metrics: ShipmentMetrics
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  tags: [String!]
+  customFields: JSON
+}
+
+"""
+Extended metadata about a shipment.
+"""
+type ShipmentDetails {
+  id: ID!
+  shipmentId: ID!
+  commodity: String
+  weight: Float
+  weightUnit: String
+  pieces: Int
+  pallets: Int
+  temperature: Float
+  temperatureUnit: String
+  temperatureMin: Float
+  temperatureMax: Float
+  hazmat: Boolean
+  hazmatClass: String
+  unNumber: String
+  specialInstructions: String
+  serviceLevel: String
+  totalMiles: Float
+  remainingMiles: Float
+  percentComplete: Float
+}
+
+"""
+Current lifecycle state of a shipment.
+"""
+type ShipmentStatus {
+  id: ID!
+  shipmentId: ID!
+  status: ShipmentStatusEnum!
+  reason: String
+  reportedAt: DateTime!
+  reportedBy: String
+  location: ShipmentLocation
+  previousStatus: ShipmentStatusEnum
+}
+
+"""
+Real-time geographic position of a shipment.
+"""
+type ShipmentLocation {
+  id: ID!
+  shipmentId: ID!
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  speed: Float
+  heading: Float
+  accuracy: Float
+  city: String
+  state: String
+  country: String
+  postalCode: String
+  address: String
+  reportedAt: DateTime!
+  source: String
+  geofenceName: String
+  distanceToNext: Float
+}
+
+"""
+Predicted arrival time at destination or next stop.
+"""
+type ShipmentETA {
+  id: ID!
+  shipmentId: ID!
+  predictedArrival: DateTime!
+  originalETA: DateTime
+  appointmentTime: DateTime
+  appointmentWindowStart: DateTime
+  appointmentWindowEnd: DateTime
+  confidence: ETAConfidence
+  isOnTime: Boolean
+  delayMinutes: Int
+  reason: String
+  calculatedAt: DateTime!
+  nextStopETA: DateTime
+  finalDestinationETA: DateTime
+}
+
+"""
+Confidence score and interval for an ETA prediction.
+"""
+type ETAConfidence {
+  level: ConfidenceLevelEnum!
+  score: Float
+  intervalLow: DateTime
+  intervalHigh: DateTime
+  factors: [String!]
+}
+
+"""
+Historical record of ETA changes over a shipment lifecycle.
+"""
+type ETAHistory {
+  shipmentId: ID!
+  events: [ETAEvent!]!
+  totalChanges: Int!
+  largestDelay: Int
+  largestEarlyArrival: Int
+}
+
+"""
+A discrete ETA recalculation event.
+"""
+type ETAEvent {
+  id: ID!
+  shipmentId: ID!
+  previousETA: DateTime
+  newETA: DateTime
+  deltaMinutes: Int
+  reason: String
+  confidence: ETAConfidence
+  triggeredBy: String
+  occurredAt: DateTime!
+}
+
+"""
+Payload representing an ETA revision.
+"""
+type ETAUpdate {
+  shipmentId: ID!
+  eta: DateTime!
+  confidence: ETAConfidence
+  reason: String
+  updatedAt: DateTime!
+}
+
+"""
+A machine-learning forecasted milestone or event.
+"""
+type PredictedEvent {
+  id: ID!
+  shipmentId: ID!
+  eventType: MilestoneTypeEnum!
+  predictedAt: DateTime!
+  confidence: ETAConfidence
+  factors: [String!]
+  calculatedAt: DateTime!
+}
+
+# ─── Carrier Types ──────────────────────────────────────────────────────────────
+
+"""
+A freight carrier entity.
+"""
+type Carrier {
+  id: ID!
+  name: String!
+  scac: SCAC
+  code: CarrierCode
+  details: CarrierDetails
+  drivers: [Driver!]
+  vehicles: [Vehicle!]
+  score: CarrierScore
+  modes: [TransportMode!]
+  active: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Extended carrier information.
+"""
+type CarrierDetails {
+  carrierId: ID!
+  dotNumber: String
+  mcNumber: String
+  usdotNumber: String
+  address: String
+  city: String
+  state: String
+  country: String
+  postalCode: String
+  phone: String
+  email: String
+  contactName: String
+  insuranceCertified: Boolean
+  safetyRating: String
+  fleetSize: Int
+  operatingStates: [String!]
+}
+
+"""
+Standardized carrier identifier.
+"""
+type CarrierCode {
+  value: String!
+  type: String
+}
+
+"""
+Standard Carrier Alpha Code identifier.
+"""
+type SCAC {
+  code: String!
+  carrierId: ID
+  carrierName: String
+}
+
+"""
+Carrier performance rating and on-time metrics.
+"""
+type CarrierScore {
+  carrierId: ID!
+  overallScore: Float
+  otpScore: Float
+  reliabilityScore: Float
+  communicationScore: Float
+  safetyScore: Float
+  totalShipments: Int
+  onTimeShipments: Int
+  lateShipments: Int
+  cancelledShipments: Int
+  calculatedAt: DateTime!
+  period: String
+}
+
+# ─── Driver Types ───────────────────────────────────────────────────────────────
+
+"""
+A driver entity associated with a load.
+"""
+type Driver {
+  id: ID!
+  carrierId: ID!
+  firstName: String
+  lastName: String
+  details: DriverDetails
+  location: DriverLocation
+  eta: DriverETA
+  currentShipmentId: ID
+  active: Boolean!
+}
+
+"""
+Extended driver information.
+"""
+type DriverDetails {
+  driverId: ID!
+  phone: String
+  email: String
+  licenseNumber: String
+  licenseState: String
+  licenseExpiry: Date
+  cdlClass: String
+  endorsements: [String!]
+  hoursAvailable: Float
+  hoursUsed: Float
+  cycleType: String
+}
+
+"""
+Real-time GPS position of a driver.
+"""
+type DriverLocation {
+  driverId: ID!
+  latitude: Float!
+  longitude: Float!
+  speed: Float
+  heading: Float
+  city: String
+  state: String
+  country: String
+  reportedAt: DateTime!
+}
+
+"""
+Driver-reported or system-computed ETA.
+"""
+type DriverETA {
+  driverId: ID!
+  shipmentId: ID
+  predictedArrival: DateTime
+  driverReportedETA: DateTime
+  confidence: ETAConfidence
+  updatedAt: DateTime!
+}
+
+# ─── Vehicle Types ──────────────────────────────────────────────────────────────
+
+"""
+A vehicle asset used for freight transport.
+"""
+type Vehicle {
+  id: ID!
+  carrierId: ID!
+  truckId: TruckID
+  trailerId: TrailerID
+  vehicleId: VehicleID
+  details: VehicleDetails
+  type: VehicleType!
+  active: Boolean!
+}
+
+"""
+Extended vehicle metadata.
+"""
+type VehicleDetails {
+  vehicleId: ID!
+  make: String
+  model: String
+  year: Int
+  vin: String
+  licensePlate: String
+  licensePlateState: String
+  color: String
+  maxPayload: Float
+  maxPayloadUnit: String
+  gpsDeviceId: String
+  eldDeviceId: String
+}
+
+"""
+Classification of vehicle.
+"""
+type VehicleType {
+  code: VehicleTypeEnum!
+  label: String!
+  description: String
+}
+
+"""
+Standardized vehicle identifier.
+"""
+type VehicleID {
+  value: String!
+  type: String
+}
+
+"""
+Tractor/power unit identifier.
+"""
+type TruckID {
+  value: String!
+  carrierId: ID
+  unitNumber: String
+}
+
+"""
+Trailer unit identifier.
+"""
+type TrailerID {
+  value: String!
+  carrierId: ID
+  unitNumber: String
+}
+
+# ─── Customer and Location Types ───────────────────────────────────────────────
+
+"""
+A shipper or consignee entity.
+"""
+type Customer {
+  id: ID!
+  name: String!
+  details: CustomerDetails
+  shipments: [Shipment!]
+  active: Boolean!
+  createdAt: DateTime!
+}
+
+"""
+Extended customer profile.
+"""
+type CustomerDetails {
+  customerId: ID!
+  accountNumber: String
+  address: String
+  city: String
+  state: String
+  country: String
+  postalCode: String
+  contactName: String
+  phone: String
+  email: String
+  industry: String
+  tier: String
+}
+
+"""
+Starting location of a shipment.
+"""
+type Origin {
+  id: ID!
+  name: String
+  address: String!
+  city: String!
+  state: String
+  country: String!
+  postalCode: String
+  latitude: Float
+  longitude: Float
+  facilityCode: String
+  scheduledPickup: DateTime
+  actualPickup: DateTime
+  appointmentRequired: Boolean
+}
+
+"""
+Ending location of a shipment.
+"""
+type Destination {
+  id: ID!
+  name: String
+  address: String!
+  city: String!
+  state: String
+  country: String!
+  postalCode: String
+  latitude: Float
+  longitude: Float
+  facilityCode: String
+  scheduledDelivery: DateTime
+  actualDelivery: DateTime
+  appointmentRequired: Boolean
+  deliveryWindowStart: DateTime
+  deliveryWindowEnd: DateTime
+}
+
+"""
+An intermediate geographic point along a route.
+"""
+type Waypoint {
+  id: ID!
+  shipmentId: ID!
+  sequence: Int!
+  latitude: Float!
+  longitude: Float!
+  name: String
+  city: String
+  state: String
+  country: String
+  plannedArrival: DateTime
+  actualArrival: DateTime
+}
+
+"""
+A planned or actual stop on a shipment's route.
+"""
+type Stop {
+  id: ID!
+  shipmentId: ID!
+  sequence: Int!
+  type: StopType!
+  status: StopStatus!
+  name: String
+  address: String
+  city: String
+  state: String
+  country: String
+  postalCode: String
+  latitude: Float
+  longitude: Float
+  facilityCode: String
+  plannedArrival: DateTime
+  actualArrival: DateTime
+  plannedDeparture: DateTime
+  actualDeparture: DateTime
+  dwellTime: Int
+  appointmentRequired: Boolean
+  appointmentTime: DateTime
+  eta: DateTime
+  notes: String
+}
+
+"""
+Classification of stop.
+"""
+type StopType {
+  code: StopTypeEnum!
+  label: String!
+}
+
+"""
+Current state of a stop.
+"""
+type StopStatus {
+  code: StopStatusEnum!
+  label: String!
+  updatedAt: DateTime
+}
+
+# ─── Milestone Types ────────────────────────────────────────────────────────────
+
+"""
+A significant event in a shipment's lifecycle.
+"""
+type Milestone {
+  id: ID!
+  shipmentId: ID!
+  type: MilestoneType!
+  occurredAt: DateTime!
+  location: ShipmentLocation
+  reportedBy: String
+  source: String
+  notes: String
+  customFields: JSON
+}
+
+"""
+Classification of milestone.
+"""
+type MilestoneType {
+  code: MilestoneTypeEnum!
+  label: String!
+  description: String
+}
+
+# ─── Load and Equipment Types ───────────────────────────────────────────────────
+
+"""
+A freight load assignment.
+"""
+type Load {
+  id: ID!
+  loadNumber: String
+  carrier: Carrier
+  driver: Driver
+  vehicle: Vehicle
+  details: LoadDetails
+  orders: [LoadOrder!]
+  items: [LoadItem!]
+  shipments: [Shipment!]
+  equipment: [Equipment!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Extended load information.
+"""
+type LoadDetails {
+  loadId: ID!
+  totalWeight: Float
+  totalPieces: Int
+  totalPallets: Int
+  totalMiles: Float
+  commodity: String
+  hazmat: Boolean
+  temperature: Float
+  temperatureUnit: String
+  specialRequirements: String
+  rate: Float
+  currency: String
+  rateType: String
+}
+
+"""
+An order or purchase order attached to a load.
+"""
+type LoadOrder {
+  id: ID!
+  loadId: ID!
+  orderNumber: String!
+  poNumber: String
+  customerOrderNumber: String
+  status: String
+  items: [LoadItem!]
+  shipTo: String
+  shipFrom: String
+  requestedDelivery: DateTime
+}
+
+"""
+An individual item or commodity within a load.
+"""
+type LoadItem {
+  id: ID!
+  loadId: ID!
+  orderId: ID
+  sku: String
+  description: String
+  quantity: Int
+  quantityUnit: String
+  weight: Float
+  weightUnit: String
+  dimensions: String
+  hazmat: Boolean
+  temperature: Float
+  lotNumber: String
+  serialNumbers: [String!]
+}
+
+"""
+Physical freight equipment.
+"""
+type Equipment {
+  id: ID!
+  carrierId: ID
+  type: EquipmentType!
+  identifier: String!
+  active: Boolean!
+  currentLocation: ShipmentLocation
+}
+
+"""
+Classification of equipment.
+"""
+type EquipmentType {
+  code: EquipmentTypeEnum!
+  label: String!
+  description: String
+}
+
+# ─── Alert and Exception Types ──────────────────────────────────────────────────
+
+"""
+A notification triggered by a shipment event or threshold breach.
+"""
+type Alert {
+  id: ID!
+  shipmentId: ID!
+  type: AlertType!
+  priority: AlertPriority!
+  title: String!
+  message: String!
+  acknowledged: Boolean!
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  resolvedAt: DateTime
+  shipment: Shipment
+  location: ShipmentLocation
+  metadata: JSON
+  createdAt: DateTime!
+}
+
+"""
+Classification of alert.
+"""
+type AlertType {
+  code: AlertTypeEnum!
+  label: String!
+  description: String
+}
+
+"""
+Urgency level of an alert.
+"""
+type AlertPriority {
+  level: AlertPriorityEnum!
+  label: String!
+  slaMinutes: Int
+}
+
+"""
+A deviation from expected shipment behavior.
+"""
+type Exception {
+  id: ID!
+  shipmentId: ID!
+  type: ExceptionType!
+  title: String!
+  description: String
+  status: String!
+  priority: AlertPriorityEnum
+  shipment: Shipment
+  location: ShipmentLocation
+  expectedResolution: DateTime
+  resolvedAt: DateTime
+  resolvedBy: String
+  rootCause: String
+  correctionAction: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Classification of exception.
+"""
+type ExceptionType {
+  code: ExceptionTypeEnum!
+  label: String!
+  description: String
+  impactLevel: String
+}
+
+# ─── Integration and Webhook Types ─────────────────────────────────────────────
+
+"""
+An event exchanged with an external TMS, ERP, or WMS system.
+"""
+type IntegrationEvent {
+  id: ID!
+  type: String!
+  source: String!
+  target: String
+  shipmentId: ID
+  payload: JSON!
+  status: String!
+  attempts: Int!
+  lastAttemptAt: DateTime
+  processedAt: DateTime
+  error: String
+  createdAt: DateTime!
+}
+
+"""
+A webhook subscription for real-time event delivery.
+"""
+type Webhook {
+  id: ID!
+  url: String!
+  events: [WebhookEventTypeEnum!]!
+  active: Boolean!
+  secret: String
+  customerId: ID
+  description: String
+  failureCount: Int!
+  lastTriggeredAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# ─── Supply Chain Types ─────────────────────────────────────────────────────────
+
+"""
+An aggregated view of a supply chain network.
+"""
+type SupplyChain {
+  id: ID!
+  name: String!
+  customerId: ID!
+  network: SupplyChainNetwork
+  activeShipments: Int
+  onTimeRate: Float
+  totalAlerts: Int
+  riskAssessment: RiskAssessment
+  performanceData: PerformanceData
+  updatedAt: DateTime!
+}
+
+"""
+The full graph of nodes and lanes in a supply chain.
+"""
+type SupplyChainNetwork {
+  supplyChainId: ID!
+  nodes: [JSON!]
+  lanes: [JSON!]
+  carriers: [Carrier!]
+  totalNodes: Int!
+  totalLanes: Int!
+  coverageRegions: [String!]
+}
+
+# ─── Risk and Disruption Types ──────────────────────────────────────────────────
+
+"""
+Weather-related risk affecting a shipment route.
+"""
+type WeatherImpact {
+  id: ID!
+  shipmentId: ID!
+  severity: String!
+  type: String!
+  description: String!
+  affectedRegion: String
+  startTime: DateTime
+  endTime: DateTime
+  delayEstimateMinutes: Int
+  alternateRouteAvailable: Boolean
+  advisories: [String!]
+  source: String
+  reportedAt: DateTime!
+}
+
+"""
+A capacity constraint or equipment shortage alert.
+"""
+type CapacityIssue {
+  id: ID!
+  region: String!
+  mode: TransportMode!
+  severity: String!
+  description: String!
+  affectedCarriers: [Carrier!]
+  estimatedDurationHours: Int
+  alternativesAvailable: Boolean
+  reportedAt: DateTime!
+}
+
+"""
+A broader supply chain disruption notification.
+"""
+type DisruptionAlert {
+  id: ID!
+  title: String!
+  description: String!
+  severity: String!
+  type: String!
+  affectedRegions: [String!]
+  affectedModes: [TransportMode!]
+  affectedCarriers: [Carrier!]
+  estimatedImpact: String
+  startTime: DateTime
+  endTime: DateTime
+  weatherImpact: WeatherImpact
+  capacityIssue: CapacityIssue
+  source: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Composite risk score and contributing factors.
+"""
+type RiskAssessment {
+  id: ID!
+  shipmentId: ID
+  supplyChainId: ID
+  overallRisk: String!
+  score: Float!
+  factors: [String!]!
+  weatherRisk: String
+  carrierRisk: String
+  routeRisk: String
+  customsRisk: String
+  recommendations: [String!]
+  assessedAt: DateTime!
+}
+
+# ─── Performance Types ──────────────────────────────────────────────────────────
+
+"""
+Aggregated operational performance statistics.
+"""
+type PerformanceData {
+  id: ID!
+  customerId: ID
+  carrierId: ID
+  period: String!
+  totalShipments: Int!
+  onTimePickup: Int
+  onTimeDelivery: Int
+  otpRate: Float
+  avgDelayMinutes: Float
+  exceptionRate: Float
+  alertRate: Float
+  avgTransitDays: Float
+  modeBreakdown: JSON
+  carrierBreakdown: JSON
+  laneBreakdown: JSON
+  calculatedAt: DateTime!
+}
+
+"""
+On-time performance metric.
+"""
+type OTP {
+  id: ID!
+  entityId: ID!
+  entityType: String!
+  period: String!
+  onTimeCount: Int!
+  totalCount: Int!
+  rate: Float!
+  trend: String
+  benchmark: Float
+  calculatedAt: DateTime!
+}
+
+# ─── Access Control Types ───────────────────────────────────────────────────────
+
+"""
+An API credential for programmatic access.
+"""
+type APIKey {
+  id: ID!
+  name: String!
+  prefix: String!
+  scopes: [String!]!
+  active: Boolean!
+  expiresAt: DateTime
+  lastUsedAt: DateTime
+  createdAt: DateTime!
+}
+
+"""
+An authentication token.
+"""
+type Token {
+  accessToken: String!
+  tokenType: String!
+  expiresIn: Int!
+  expiresAt: DateTime!
+  scope: String
+}
+
+# ─── Shipment Metrics ────────────────────────────────────────────────────────────
+
+"""
+Performance and operational statistics for a shipment.
+"""
+type ShipmentMetrics {
+  shipmentId: ID!
+  totalMiles: Float
+  milesRemaining: Float
+  percentComplete: Float
+  transitDays: Int
+  daysOnTime: Boolean
+  delayMinutes: Int
+  stopCount: Int
+  completedStops: Int
+  dwellTimeTotal: Int
+  exceptionCount: Int
+  alertCount: Int
+  etaChanges: Int
+  updatedAt: DateTime!
+}
+
+# ─── Input Types ────────────────────────────────────────────────────────────────
+
+input ShipmentFilter {
+  status: [ShipmentStatusEnum!]
+  mode: [TransportMode!]
+  carrierId: ID
+  customerId: ID
+  dateFrom: DateTime
+  dateTo: DateTime
+  originState: String
+  destinationState: String
+  delayed: Boolean
+  hasAlerts: Boolean
+  hasExceptions: Boolean
+}
+
+input CarrierFilter {
+  name: String
+  scac: String
+  mode: [TransportMode!]
+  active: Boolean
+}
+
+input ExceptionFilter {
+  type: [ExceptionTypeEnum!]
+  shipmentId: ID
+  carrierId: ID
+  status: String
+  dateFrom: DateTime
+  dateTo: DateTime
+}
+
+input DateRangeInput {
+  from: DateTime!
+  to: DateTime!
+}
+
+input LocationInput {
+  latitude: Float!
+  longitude: Float!
+  speed: Float
+  heading: Float
+  reportedAt: DateTime
+}
+
+input CreateShipmentInput {
+  referenceNumber: String!
+  mode: TransportMode!
+  carrierId: ID
+  customerId: ID!
+  origin: OriginInput!
+  destination: DestinationInput!
+  stops: [StopInput!]
+  details: ShipmentDetailsInput
+  tags: [String!]
+  customFields: JSON
+}
+
+input OriginInput {
+  name: String
+  address: String!
+  city: String!
+  state: String
+  country: String!
+  postalCode: String
+  scheduledPickup: DateTime
+}
+
+input DestinationInput {
+  name: String
+  address: String!
+  city: String!
+  state: String
+  country: String!
+  postalCode: String
+  scheduledDelivery: DateTime
+  deliveryWindowStart: DateTime
+  deliveryWindowEnd: DateTime
+}
+
+input StopInput {
+  sequence: Int!
+  type: StopTypeEnum!
+  name: String
+  address: String!
+  city: String!
+  state: String
+  country: String!
+  postalCode: String
+  plannedArrival: DateTime
+  plannedDeparture: DateTime
+}
+
+input ShipmentDetailsInput {
+  commodity: String
+  weight: Float
+  weightUnit: String
+  pieces: Int
+  pallets: Int
+  temperature: Float
+  temperatureUnit: String
+  hazmat: Boolean
+  specialInstructions: String
+}
+
+input WebhookInput {
+  url: String!
+  events: [WebhookEventTypeEnum!]!
+  secret: String
+  customerId: ID
+  description: String
+}
+
+# ─── Pagination ─────────────────────────────────────────────────────────────────
+
+type PageInfo {
+  page: Int!
+  pageSize: Int!
+  totalCount: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type ShipmentConnection {
+  nodes: [Shipment!]!
+  pageInfo: PageInfo!
+}
+
+type AlertConnection {
+  nodes: [Alert!]!
+  pageInfo: PageInfo!
+}
+
+type ExceptionConnection {
+  nodes: [Exception!]!
+  pageInfo: PageInfo!
+}
+
+# ─── Query ──────────────────────────────────────────────────────────────────────
+
+type Query {
+  """Fetch a single shipment by ID."""
+  shipment(id: ID!): Shipment
+
+  """List shipments with optional filtering and pagination."""
+  shipments(filter: ShipmentFilter, page: Int, pageSize: Int): ShipmentConnection!
+
+  """Fetch a carrier by ID."""
+  carrier(id: ID!): Carrier
+
+  """List carriers."""
+  carriers(filter: CarrierFilter, page: Int, pageSize: Int): [Carrier!]!
+
+  """Fetch a load by ID."""
+  load(id: ID!): Load
+
+  """Fetch a driver by ID."""
+  driver(id: ID!): Driver
+
+  """Fetch a customer by ID."""
+  customer(id: ID!): Customer
+
+  """List alerts, optionally scoped to a shipment."""
+  alerts(shipmentId: ID, page: Int, pageSize: Int): AlertConnection!
+
+  """List exceptions with optional filtering."""
+  exceptions(filter: ExceptionFilter, page: Int, pageSize: Int): ExceptionConnection!
+
+  """Query carrier performance data."""
+  performanceData(carrierId: ID, customerId: ID, dateRange: DateRangeInput): PerformanceData
+
+  """Get OTP metrics for a carrier or customer."""
+  otp(entityId: ID!, entityType: String!, period: String): OTP
+
+  """Fetch supply chain network view."""
+  supplyChain(id: ID!): SupplyChain
+
+  """Get risk assessment for a shipment."""
+  riskAssessment(shipmentId: ID!): RiskAssessment
+
+  """Get active disruption alerts."""
+  disruptionAlerts(region: String, mode: TransportMode): [DisruptionAlert!]!
+
+  """Get weather impacts for a shipment."""
+  weatherImpacts(shipmentId: ID!): [WeatherImpact!]!
+
+  """Get ETA history for a shipment."""
+  etaHistory(shipmentId: ID!): ETAHistory
+
+  """Get predicted events for a shipment."""
+  predictedEvents(shipmentId: ID!): [PredictedEvent!]!
+
+  """List registered webhooks."""
+  webhooks(customerId: ID): [Webhook!]!
+
+  """List API keys for the authenticated account."""
+  apiKeys: [APIKey!]!
+
+  """Resolve a SCAC code to a carrier."""
+  scacLookup(code: String!): SCAC
+}
+
+# ─── Mutation ───────────────────────────────────────────────────────────────────
+
+type Mutation {
+  """Create a new shipment."""
+  createShipment(input: CreateShipmentInput!): Shipment!
+
+  """Update the status of a shipment."""
+  updateShipmentStatus(id: ID!, status: ShipmentStatusEnum!, reason: String): ShipmentStatus!
+
+  """Push a location update for a shipment."""
+  updateShipmentLocation(id: ID!, location: LocationInput!): ShipmentLocation!
+
+  """Acknowledge an alert."""
+  acknowledgeAlert(id: ID!): Alert!
+
+  """Resolve an exception."""
+  resolveException(id: ID!, resolution: String): Exception!
+
+  """Register a new webhook."""
+  createWebhook(input: WebhookInput!): Webhook!
+
+  """Update an existing webhook."""
+  updateWebhook(id: ID!, input: WebhookInput!): Webhook!
+
+  """Remove a webhook."""
+  deleteWebhook(id: ID!): Boolean!
+
+  """Record a milestone for a shipment."""
+  recordMilestone(shipmentId: ID!, type: MilestoneTypeEnum!, occurredAt: DateTime, notes: String): Milestone!
+}
+
+# ─── Subscription ───────────────────────────────────────────────────────────────
+
+type Subscription {
+  """Real-time location updates for a shipment."""
+  shipmentLocationUpdated(shipmentId: ID!): ShipmentLocation!
+
+  """Real-time ETA changes for a shipment."""
+  shipmentETAUpdated(shipmentId: ID!): ShipmentETA!
+
+  """Real-time status changes for a shipment."""
+  shipmentStatusUpdated(shipmentId: ID!): ShipmentStatus!
+
+  """Stream of new alerts, optionally scoped to a customer."""
+  alertCreated(customerId: ID): Alert!
+
+  """Stream of new exceptions, optionally scoped to a customer."""
+  exceptionCreated(customerId: ID): Exception!
+
+  """Stream of new milestones for a shipment."""
+  milestoneReached(shipmentId: ID!): Milestone!
+}
