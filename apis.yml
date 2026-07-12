@@ -33,6 +33,8 @@ apis:
   - url: graphql/fourkites-graphql.md
     type: GraphQL
 common:
+- type: DomainSecurity
+  url: security/fourkites-domain-security.yml
 - type: GitHubOrganization
   url: https://github.com/FourKites
 - type: LinkedIn
