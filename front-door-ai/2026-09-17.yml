@@ -1,0 +1,32 @@
+# Front Door AI Index — fourkites — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: fourkites
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: www.fourkites.com
+  final_host: www.fourkites.ai
+  ownership: own
+  owner: fourkites
+  shares_host_with:
+  - haven
+  inherited_from: null
+  verdict: scored
+  score: 39
+  host_score: 39
+  density: 11.26
+  words: 3465
+  tiers:
+    agentic: 10
+    core: 29
+    model: 0
+  ambiguous: 80
+  top_terms:
+    agent: 42
+    intelligence: 31
+    AI: 26
+    AI agent: 10
+    automation: 5
+    ML: 3
+    predictive: 2
