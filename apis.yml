@@ -53,8 +53,6 @@ apis:
   properties:
   - type: Documentation
     url: https://developers.fourkites.com/
-  - url: graphql/fourkites-graphql.md
-    type: GraphQL
 common:
 - type: DomainSecurity
   url: security/fourkites-domain-security.yml
