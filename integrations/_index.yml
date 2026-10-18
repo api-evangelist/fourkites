@@ -27,5 +27,5 @@
     - connectors/applications/fourkites
     vendor_link: https://fourkites.com/
     builder: Fivetran
-  status: pending-partner-spec
+  status: not-a-workflow
   arazzo: null
