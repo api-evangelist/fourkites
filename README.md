@@ -1,4 +1,4 @@
-# FourKites (fourkites)
+# FourKites
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,36 +66,107 @@
 
 FourKites is a real-time supply chain visibility platform that tracks shipments and assets across road, rail, ocean, and yard modes worldwide.
 
-**URL:** [Visit APIs.json URL](https://raw.githubusercontent.com/api-evangelist/fourkites/refs/heads/main/apis.yml)
+**Areas:** Logistics · Supply Chain Visibility · Tracking · Freight · ETA
 
-**Run:** [Capabilities Using Naftiko](https://github.com/naftiko/fleet?utm_source=api-evangelist&utm_medium=readme&utm_campaign=fourkites-api-evangelist&utm_content=repo)
+## FourKites on APIs.io
 
-## Type
-- **x-type:** company
+Everything profiled for FourKites is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/fourkites/](https://apis.io/providers/fourkites/)** — or go straight to one of the APIs or properties below.
 
-## Tags:
- - Logistics, Supply Chain Visibility, Tracking, Freight, ETA
+### APIs (1)
 
-## Timestamps
-- **Created:** 2026-05-08
-- **Modified:** 2026-05-08
+- [FourKites Tracking API](https://apis.io/apis/fourkites/fourkites-tracking-api/) — FourKites Tracking API provides shipment creation, status, and ETA updates plus carrier integrations across modes (TL, LTL, ocean, rail, parcel) for…
 
-## APIs
+### Published properties
 
-### FourKites Tracking API
-FourKites Tracking API provides shipment creation, status, and ETA updates plus carrier integrations across modes (TL, LTL, ocean, rail, parcel) for real-time supply chain visibility.
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-- **Human URL:** https://developers.fourkites.com/
-- **Base URL:** https://tracking-api.fourkites.com
+#### GraphQL (1)
 
-## Common Properties
+GraphQL schemas.
+
+- [Moved to /providers/fourkites/](https://apis.io/graphqls/fourkites/fourkites-graphql/)
+
+#### Security (1)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Fourkites Domain Security](https://apis.io/security/fourkites/fourkites-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Fourkites Plans Pricing](https://apis.io/plans/fourkites/fourkites-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Fourkites Rate Limits](https://apis.io/rate-limits/fourkites/fourkites-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Fourkites Finops](https://apis.io/finops/fourkites/fourkites-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
 - [Website](https://www.fourkites.com/)
 - [Documentation](https://developers.fourkites.com/)
-- [Plans](plans/fourkites-plans-pricing.yml) — placeholder, pipeline reconciles later
-- [RateLimits](rate-limits/fourkites-rate-limits.yml) — placeholder
-- [FinOps](finops/fourkites-finops.yml) — FOCUS-aligned placeholder
+- [GitHub](https://github.com/FourKites)
 
-## Maintainers
-**FN:** Kin Lane
+## API Evangelist rating
 
-**Email:** kin@apievangelist.com
+**Kin Score 7.4** — minimal · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 57.1 |
+| Contract quality | 0.0 |
+| Contract governance | 0.0 |
+| Operational transparency | 7.9 |
+| Developer ergonomics | 4.8 |
+| Access clarity | 5.3 |
+
+**Agent readiness 0.6** — human-only
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | — |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 5.9** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/fourkites/](https://apis.io/providers/fourkites/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for FourKites: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/fourkites/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
